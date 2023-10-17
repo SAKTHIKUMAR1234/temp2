@@ -16,7 +16,7 @@ export const createUser = createAsyncThunk(
       console.log("------2--send--");
       return response;
     } catch (error) {
-      console.log("---3--send--");
+      console.log(error);
       return rejectWithValue(error);
     }
   }
@@ -36,7 +36,7 @@ export const getUser = createAsyncThunk(
       return result;
 
     } catch (error) {
-      console.log("--error-read---");
+      console.log("--error-read---",error);
 
       return rejectWithValue(error);
     }

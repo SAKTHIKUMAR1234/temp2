@@ -12,7 +12,7 @@ export const recommendedUser = createAsyncThunk(
       );
       console.log("----2-read--");
       const result = await response.data;
-      console.log("--3--recommend-", result);
+      console.log("--3--recommend-");
 
       return result;
     } catch (error) {
@@ -45,6 +45,30 @@ export const requestedUser = createAsyncThunk(
   }
 );
 
+//notifications list
+export const notificationList = createAsyncThunk(
+  "notificationList",
+  async (userId, { rejectWithValue }) => {
+    console.log("---1--notify list--");
+    try {
+      const response = await fetch_get(
+        `http://192.168.1.197:8080/api/v1/notifyUser/getNotifications/${userId}`
+      );
+      console.log("----2-notify list----");
+      const result = await response.data;
+      console.log("--3--recommend-", result);
+
+      return result;
+    } catch (error) {
+      console.log("--error--notifylist---");
+
+      return rejectWithValue(error);
+    }
+  }
+);
+
+
+
 
 export const recommendationList = createSlice({
   name: "recommendationList",
@@ -53,6 +77,7 @@ export const recommendationList = createSlice({
     loading: false,
     error: null,
     requested_user:[],
+    notify_list:[],
 
   },
   reducers: {
@@ -80,6 +105,17 @@ export const recommendationList = createSlice({
       state.requested_user = action.payload;
     });
     builder.addCase(requestedUser.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload.message;
+    });
+    builder.addCase(notificationList.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(notificationList.fulfilled, (state, action) => {
+      state.loading = false;
+      state.notify_list = action.payload;
+    });
+    builder.addCase(notificationList.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload.message;
     });

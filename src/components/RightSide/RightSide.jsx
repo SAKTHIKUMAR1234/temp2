@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { Button } from "../Button/Button";
 import SettingsModal from "../SettingsModal.jsx/SettingsModal";
 import RequestsCard from "../RequestsCard/RequestsCard";
+import NotificationCard from "../NotificationCard/NotificationCard";
 
 const RightSide = () => {
   const user_data = useSelector((state) => {
@@ -127,7 +128,7 @@ const RightSide = () => {
         )}
       <RequestsCard />
       <div></div>
-
+<NotificationCard />
       <Button
         text="Share"
         className="button r-button"

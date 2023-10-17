@@ -3,14 +3,13 @@
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-}
-
-.logo-img img{
- 
-width: 50%;
-height:50%;
-}
-.Search{
+   }
+   .logo-img{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+   }
+   .Search{
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -18,9 +17,9 @@ height:50%;
     border-radius: 10px;
     position: relative;
     margin: 5px;
-}
-
-.search-bar{
+   }
+   
+   .search-bar{
     width: 100%;
     background-color: transparent;
     border:none;
@@ -28,14 +27,9 @@ height:50%;
     margin: 5px;
     padding: 8px;
     border: 1px solid rgba(255, 255, 255, 0.25);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    
     border-radius: 15px;
-
-}
-
-
-
-
-
+   
+   }

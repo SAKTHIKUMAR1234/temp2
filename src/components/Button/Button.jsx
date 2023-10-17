@@ -4,7 +4,6 @@ export const Button = (props) =>{
     return (
         <button
         type={props.type || 'button'}
-
         onClick={click}
         className={props.className}
         color={props.textColor}

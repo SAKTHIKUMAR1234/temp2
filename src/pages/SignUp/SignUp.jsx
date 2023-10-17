@@ -12,17 +12,19 @@ function SignUp() {
   let [li, setLi] = useState([]);
   const navigate = useNavigate();
   const [popup, setPopup] = useState(false);
-  //
+ 
   const [users, setUsers] = useState({});
   const dispatch = useDispatch();
-  //read
-
-  const lists = useSelector((state) => {
-    return state.list_interest.lists;
-  });
+ 
   useEffect(() => {
     dispatch(showList());
   }, []);
+  const lists = useSelector((state) => {
+    return state.list_interest.lists;
+  });
+  
+
+  console.log(lists)
 
   //
 
@@ -230,7 +232,7 @@ function SignUp() {
                       id="Private"
                       className="acc-type"
                       name="accountType"
-                      value="Private"
+                      value="private"
                       onChange={getUserData}
                     />
                     <label htmlFor="Private" className="radio-label">
@@ -242,7 +244,7 @@ function SignUp() {
                       id="Public"
                       name="accountType"
                       className="acc-type"
-                      value="Public"
+                      value="public"
                       onChange={getUserData}
                     />
                     <label htmlFor="Public" className="radio-label">

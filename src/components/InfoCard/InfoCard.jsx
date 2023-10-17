@@ -5,12 +5,15 @@ import ProfileModal from "../ProfileModal/ProfileModal";
 import { Button } from "../Button/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../../Reducers/userDetailsSlice";
+import { useNavigate } from "react-router-dom";
 
 const InfoCard = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(updateUser(user_data));
   },[]);
+
+  const navigate = useNavigate()
 
   const user_data = useSelector((state) => {
     return state.userDetails.user_data;
@@ -47,7 +50,10 @@ const InfoCard = () => {
         </span>
       </div>
 
-      <Button className="button logout-button" text="LogOut" />
+      <Button className="button logout-button" text="LogOut"  onClick={()=>{
+        sessionStorage.clear()
+        navigate('/login')
+      }}/>
     </div>
   );
 };

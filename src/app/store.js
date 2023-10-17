@@ -13,6 +13,7 @@ const reducers = combineReducers({
   list_interest: interestList.reducer,
   userDetails: userDetail.reducer,
   followSuggestion: recommendationList.reducer,
+  
 });
 
 export const store = createStore(reducers, composeEnhancers(middleware));

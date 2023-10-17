@@ -23,7 +23,7 @@ function Login() {
             "Authorization": responce.data.accessToken
           }
           sessionStorage.setItem("AuthHead", JSON.stringify(header));
-          sessionStorage.setItem("userId",responce.data.userId)
+          sessionStorage.setItem("userId",JSON.stringify(responce.data.userId))
           navigate('/home',{replace:true})
         } catch (error) {
           alert("User Not Found Please Sign-up");

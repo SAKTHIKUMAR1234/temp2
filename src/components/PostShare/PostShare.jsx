@@ -1,210 +1,186 @@
-import React, { useState, useRef } from "react";
-import ProfileImage from "../../img/profilepic.png";
+import React, { useState, useRef, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import "./PostShare.css";
-import { UilScenery } from "@iconscout/react-unicons";
-// import { UilPlayCircle } from "@iconscout/react-unicons";
-import { UilSchedule } from "@iconscout/react-unicons";
-import { UilTimes } from "@iconscout/react-unicons";
-import {IoMdArrowRoundBack} from "react-icons/io";
+import { BsUpload } from "react-icons/bs";
 import { Button } from "../Button/Button";
-import { BsFillTagsFill } from "react-icons/bs";
-// // import TrendCard from '../TrendCard/TrendCard'
-// import ShareModal from "../ShareModal/ShareModal";
+import { useSelector } from "react-redux";
+import { showList } from "../../Reducers/interestListsSlice";
+import { createPost } from "../../Reducers/postsSlice";
 
 const PostShare = () => {
-  const [image, setImage] = useState(null);
-  const imageRef = useRef();
-  const [popup, setPopup] = useState(false);
-  const [tagList, setTagList] = useState([]);
 
-  const [modalOpened, setModalOpened] = useState(false);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(showList());
+  }, []);
 
-  const handleclickopen = () => {
-    setPopup(!popup);
-  };
-  const closepopup = () => {
-    setPopup(false);
-  };
-  const [data, setData] = useState({
-    date: "",
+  const user_data = useSelector((state) => {
+    return state.userDetails.user_data;
   });
-  const { date } = data;
-  const onChange = (e) => {
-    setData(e.target.value);
-  };
-  const clickSubmit = (e) => {
-    console.log(data);
-  };
-  const [content, setContent] = useState({
-    cont: "",
-  });
-  const { cont } = content;
-  const onChangeContent = (e) => {
-    e.preventDefault();
-    setContent({ ...content, [e.target.name]: [e.target.value] });
-  };
-  const whatHappen = (e) => {
-    e.preventDefault();
-    console.log(content);
-  };
-  const [tappopup, setTag] = useState(false);
-  const tagHandlePopUp = () => {
-    setTag(!tappopup);
-  };
-  const tapPopClose = () => {
-    setTag(false);
-  };
 
-  const [inputTags, setInputTags] = useState([
-    'homaker', 'development', 'coding', 'cooking', 'writing', 'investing', 'reading','gaming'
-  ]);
-  const handleKeyDown = (e) => {
-    if (e.key !== "Enter") return;
+  const lists = useSelector((state) => {
+    return state.list_interest.lists;
+  });
+
+  const [textValue, setTextValue] = useState('');
+ 
+
+  const handleTextChange = (e) => {
     const value = e.target.value;
-    if (!value.trim()) return;
-    setInputTags([...inputTags, value]);
-    console.log(inputTags);
+    setTextValue(value);
+   
+
+  };
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const onUploadFile = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        setSelectedImage(e.target.result);
+      };
+
+      reader.readAsDataURL(file);
+      formData.set("file",file);
+    }
   };
 
-  // const removeTag = (index) => {
-  //   setInputTags(inputTags.filter((el, i) => i !== index))
+  const [schedule, setSchedule] = useState(getCurrentDateTime);
+  function getCurrentDateTime() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // Month is zero-based
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
 
-  // }
-  const [color, setColor] = useState("grey");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
 
-  const colorHandle = (e) => {
-    if (tagList.indexOf(e) === -1) {
-      document.querySelector("#" + e).classList.remove("tag-item-grey");
-      document.querySelector("#" + e).classList.add("tag-item-green");
-      tagList.push(e);
-      console.log(e);
+  const [clickedButtons, setClickedButtons] = useState([]);
+
+  const handleButtonClick = (e, buttonId) => {
+    e.preventDefault();
+    if (clickedButtons.includes(buttonId)) {
+      setClickedButtons(clickedButtons.filter((id) => id !== buttonId));
     } else {
-      document.querySelector("#" + e).classList.remove("tag-item-green");
-      document.querySelector("#" + e).classList.add("tag-item-grey");
-      tagList.splice(tagList.indexOf(e), 1);
+      setClickedButtons([...clickedButtons, buttonId]);
     }
   };
+  const [formData, setFormData] = useState(new FormData());
+  
 
-  const [sharePost, setSharepost] = useState(false);
-  const postHandle = () => {
-    setSharepost(!sharePost);
-  };
-  const closeSharePost = () => {
-    setSharepost(false);
-  };
 
-  const onImageChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      let img = event.target.files[0];
-      setImage({
-        image: URL.createObjectURL(img),
-      });
-    }
-  };
+
+
+
+  function onPost(e) {
+   e.preventDefault();
+  const data_string = clickedButtons.join(",");
+    formData.set("userId",user_data.userId);
+    formData.set("interests",data_string);
+    formData.set("scheduledTime",schedule.replace('T'," "));
+    formData.set("description",textValue);
+    dispatch(createPost(formData));
+  }
   return (
-    <div className="PostShare">
-      <button className="postbutton" onClick={postHandle}>
-        Share a post...!
-      </button>
-      <div>
-        <div>
-          {sharePost ? (
-            <div className="MainsharePosting">
-              <div className="sharePost">
-                <div className="fullSharepost">
-                  <div className="headingPost">
-                    <div className="head-bar">
-                      <h1 className="heading" onClick={closeSharePost} >
-                        <IoMdArrowRoundBack></IoMdArrowRoundBack>
-                      </h1>
-                      <h1 className="heading">Share a Post</h1>
-                    </div>
-                    <div className="description-input">
-                      <img src={ProfileImage} className="profileImage" width="10px" alt="" />
-                      <input
-                        type="text"
-                        placeholder="What's happening"
-                        name="cont"
-                        value={cont}
-                        className="whatHappening"
-                        onChange={onChangeContent}
-                      />
-                    </div>
-                  </div>
-                  <div className="postOptions">
-                    <div
-                      className="option"
-                      style={{ color: "var(--photo)" }}
-                      onClick={() => imageRef.current.click()}
-                    >
-                      <h1 className="profileImage">Profile image :</h1>
-                      <input
-                        type="file"
-                        name="chooseProfilepic"
-                        className="postFile"
-                      />
-                    </div>
-                    <div className="option1" style={{ color: "var(--video)" }}>
-                      <div>
-                          <div className="mainpopup-tag">
-                            <div className="tagPop-up">
-                              <div className="tag-header">
-                                <h1 className="tags-h1">Tags</h1>
-                              </div>
-                            </div>
-                            <div className="tag-inputContainer">
-                                {inputTags.map((tags, index) => {
-                                  return (
-                                    <button
-                                      className="tag-item-grey"
-                                      id={tags}
-                                      key={index}
-                                      name={tags}
-                                      value={index}
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        colorHandle(tags);
-                                      }}
-                                      style={{ backgroundColor: color }}
-                                    >
-                                      <span className="text-items">{tags}</span>
-                                      <span className="close">+</span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                          </div>
-                          <div className="schedulepost">
-                            <h1>schedulePost</h1>
-                            <input type="datetime-local"/>
-                          </div>
-                          <button className="postingButton">post</button>
-                      </div>
-                    </div>
-                
-                
-              
-                    {/* <Button
-                      className="submitButton"
-                      onClick={whatHappen}
-                      text="Submit"
-                    ></Button> */}
-             
-                  </div>
-                  {/* {image && (
-                    <div className="previewImage">
-                      <UilTimes onClick={() => setImage(null)} />
-                      <img src={image.image} alt="" />
-                    </div>
-                  )} */}
-                </div>
-              </div>
-            </div>
-          ) : (
-            ""
-          )}
+    <div className="PostShare modal-container">
+      <form action="">
+        <h1>Share a Post</h1>
+        <div className="description-input ">
+          <img
+            src={"http://192.168.1.197:8080/" + user_data.userProfile}
+            className="profile-image"
+            width="10px"
+            alt=""
+          />
+          <textarea
+            type="text"
+            placeholder="Write Something You wish to post..."
+             value={textValue}
+            onChange={(e)=>{handleTextChange(e)}}
+          />
         </div>
-      </div>
+        <label htmlFor="postFile">
+          <div
+            className="post-option"
+            onClick={(e) => document.getElementById("file-input").click()}
+          >
+            <h3 className="profileImage">Upload image/video to Post </h3>
+            <BsUpload size={25} />
+          </div>
+        </label>
+        <input
+          type="file"
+          name="postFile"
+          className="postFile"
+          id="file-input"
+          accept="image/*,video/*"
+          onChange={(e) => onUploadFile(e)}
+          required
+        />
+        {selectedImage && (
+          <div className="previewImage">
+            <img src={selectedImage} alt="wrong format" />
+          </div>
+        )}
+
+        <div className="tag-option">
+          <h1 className="tag-head">Tags :</h1>
+
+          <div className="tag-box">
+            <div className="taginput-Buttons">
+              {lists.map((tags, index) => {
+                return (
+                  <>
+                    <Button
+                      className="option-button tag-btn"
+                      id={tags[1]}
+                      key={index}
+                      name={tags}
+                      value={tags[1]}
+                      text={tags[1]}
+                      style={{
+                        backgroundColor: clickedButtons.includes(index)
+                          ? "var(--theme_color)"
+                          : "white",
+                        color: clickedButtons.includes(index)
+                          ? "white"
+                          : "var(--theme_color)",
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleButtonClick(e, tags[1]);
+                      }}
+                    />
+                  </>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="schedulepost">
+          <h3>Schedule to Post :</h3>
+          <input
+            type="datetime-local"
+            min={getCurrentDateTime()}
+            onChange={(e) => {
+              setSchedule(e.target.value);
+              console.log(schedule);
+            }}
+          />
+        </div>
+        <div className="center">
+          <Button
+            className="post-Button button "
+            text="Post"
+            onClick={(e)=>{onPost(e)}}
+          />
+        </div>
+      </form>
     </div>
   );
 };

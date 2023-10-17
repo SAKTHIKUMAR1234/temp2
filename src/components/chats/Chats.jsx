@@ -1,23 +1,108 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./chats.css";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { Followers } from "../../Data/FollowersData";
 import { Modal, useMantineTheme } from "@mantine/core";
-import { useSelector } from "react-redux";
-import { Button } from "../Button/Button";
+import axios from "axios";
 
-const Chats = ({chatpop,setChatPopup}) => {
+const Chats = ({ chatpop, setChatPopup }) => {
   const theme = useMantineTheme();
 
-  const recommended_Users = useSelector((state) => {
-    return state.followSuggestion.user_suggestion;
-  });
+  const userId = JSON.parse(sessionStorage.getItem('userId'))
 
-  const [sendingMessage,setSendMessage]=useState('')
+  const [chats, setChats] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
 
-  const sendMessage = (e)=>{
-    setSendMessage(e.target.value)
-  }
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setSearchResults([]);
+  };
+
+  const handleSearch = async () => {
+    if (searchQuery.trim() !== "") {
+      try {
+        const response = await axios.get(`http://192.168.1.197:8080/api/v1/userdetails/searchUser/${searchQuery}`,{
+          headers:{
+            "Authorization":"Bearer "+JSON.parse(sessionStorage.getItem("AuthHead")).Authorization
+          }
+        }
+        );
+        setSearchResults(response.data.body);
+      } catch (error) {
+        console.error("Error searching for users:", error);
+      }
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await axios.get(`http://192.168.1.197:8080/api/v1/message/getChatList/${userId}`,{
+          headers:{
+            "Authorization":"Bearer "+JSON.parse(sessionStorage.getItem("AuthHead")).Authorization
+          }
+        });
+        setChats(response.data);
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+      }
+    };
+
+    fetchChats();
+  }, []);
+
+  useEffect(() => {
+    let intervalId;
+
+    const data = {
+      "user1": userId,
+      "user2": selectedUser
+    }
+    const fetchMessages = async () => {
+      if (selectedUser) {
+        try {
+          const response = await axios.get(
+            `https://api.example.com/messages/${selectedUser.id}`
+          );
+          setMessages(response.data);
+        } catch (error) {
+          console.error("Error fetching messages:", error);
+        }
+      }
+    };
+
+    const startPolling = () => {
+      fetchMessages();
+      intervalId = setInterval(() => {
+        fetchMessages();
+      }, 5000);
+    };
+
+    const stopPolling = () => {
+      clearInterval(intervalId);
+    };
+
+    if (selectedUser) {
+      startPolling();
+    } else {
+      stopPolling();
+    }
+
+    return stopPolling;
+  }, [selectedUser]);
+
+  const sendMessage = () => {
+    if (newMessage.trim() !== "") {
+      setMessages([...messages, { text: newMessage, sender: "me" }]);
+      setNewMessage("");
+    }
+  };
 
   return (
     <>
@@ -31,96 +116,94 @@ const Chats = ({chatpop,setChatPopup}) => {
         overlayOpacity={0.55}
         overlayBlur={3}
         padding="0%"
-       
-        opened={chatpop} // Use the prop here to control the modal visibility
+        opened={chatpop}
       >
         <div className="FollowersCard1">
           <div className="heading"></div>
           <div className="chat-box">
-            <div className="chat-left">
-              <div id="container">
-                <aside>
+            <div id="container">
+              <aside>
+                <header>
+                  <div className="back-btn">
+                    <IoMdArrowRoundBack
+                      size={30}
+                      color="white"
+                      onClick={setChatPopup}
+                    ></IoMdArrowRoundBack>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value) }}
+                  />
+                  <button className="button" onClick={handleSearch}>Search</button>
+                </header>
+                <ul>
+                  {!searchQuery ? (
+                    chats.map((user) => (
+                      <li key={user.user2.userId} onClick={() => handleUserClick(user.user2.userId)}>
+                        <img
+                          src={user.userProfile}
+                          className="profile-image"
+                          alt=""
+                        />
+                        <div>
+                          <h2>{user.user2.userName}</h2>
+                        </div>
+                      </li>
+                    ))
+                  ) : (
+                    searchResults.map((user) => (
+                      <li key={user.userId} onClick={() => handleUserClick(user.userId)}>
+                        <img
+                          src={user.profileImage}
+                          className="profile-image"
+                          alt=""
+                        />
+                        <div>
+                          <h2>{user.userName}</h2>
+                        </div>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </aside>
+              <main>
+                {selectedUser ? (
                   <header>
-                    <div className="back-btn">
-                      <IoMdArrowRoundBack
-                        size={30}
-                        color="white"
-                        onClick={setChatPopup}
-                      ></IoMdArrowRoundBack>
-                    </div>
-                    <input type="text" placeholder="search" />
+                    {/* Render the user's information here */}
                   </header>
-                  <ul>
-                    {recommended_Users.map((friends, id) => {
-                      return (
-                        <>
-                          <li>
-                            <img
-                            src={"http://192.168.1.197:8080/"+(friends.userProfile ? friends.userProfile:"user.png")}  className="profile-image"
-                              alt=""
-                            />
-                            <div>
-                              <h2>{friends.userName}</h2>
-                             
-                            </div>
-                          </li>
-                        </>
-                      );
-                    })}
-                  </ul>
-                </aside>
-                <main>
-                  <header>
-                    <img
-                      src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1940306/chat_avatar_01.jpg"
-                      alt=""
-                    />
-                    <div>
-                      <div className="arr">
-                        <i class="fa-solid fa-arrow-left"></i>
-                      </div>
-                      <h2>Chat with Vincent Porter</h2>
-                      <h3>already 1902 messages</h3>
-                    </div>
-                    <img
-                      src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1940306/ico_star.png"
-                      alt=""
-                    />
-                  </header>
-                  <ul id="chat">
-                    <li class="you">
-                      <div class="entete">
-                        <span class="status green"></span>
-                        <h2>Vincent</h2>
-                        <h3>10:12AM, Today</h3>
-                      </div>
-                      <div class="triangle"></div>
-                      <div class="message">
-                        Lorem ipsum dolor sit amet, consectetuer adipiscing
-                        elit. Aenean commodo ligula eget dolor.""
-                      </div>
-                    </li>
-                    <li class="me">
-                      <div class="entete">
-                        <h3>10:12AM, Today</h3>
-                        <h2>Vincent</h2>
-                        <span class="status blue"></span>
-                      </div>
-                      <div class="triangle"></div>
-                      <div class="message">
-                        Lorem ipsum dolor sit amet, consectetuer adipiscing
-                        elit. Aenean commodo ligula eget dolor.
-                        <div value={sendingMessage} onChange={sendMessage}>{sendingMessage}</div>
-                      </div>
-                    </li>
-                  </ul>
+                ) : (
+                  <p className="chatbox">Select a user to start a chat.</p>
+                )}
+                <ul id="chat">
+                  {selectedUser &&
+                    messages.map((message, index) => (
+                      <li key={index} className={message.sender}>
+                        <div className="entete">
+                          <span className="status green"></span>
+                          <h2>{message.sender}</h2>
+                        </div>
+                        <div className="triangle"></div>
+                        <div className="message">{message.text}</div>
+                      </li>
+                    ))}
+                </ul>
+                {selectedUser && (
                   <footer>
-                    <textarea placeholder="Type your message"></textarea>
-                   
-                    <Button text="Send" className="button send-button" onChange={sendMessage}/>
+                    <textarea
+                      placeholder="Type your message"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      className="chatbox"
+                    />
+                    <button className="button send-button" onClick={sendMessage}>
+                      Send
+                    </button>
                   </footer>
-                </main>
-              </div>
+                )}
+              </main>
             </div>
           </div>
         </div>

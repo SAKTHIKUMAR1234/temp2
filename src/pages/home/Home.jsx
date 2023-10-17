@@ -5,7 +5,7 @@ import RightSide from "../../components/RightSide/RightSide";
 import "./Home.css";
 import { useDispatch, useSelector } from "react-redux";
 import { getConnectionCount, getPostCount, getUser } from "../../Reducers/userDetailsSlice";
-import { recommendedUser } from "../../Reducers/recommendationListsSlice";
+import { notificationList, recommendedUser } from "../../Reducers/recommendationListsSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useId } from "react";
@@ -28,6 +28,7 @@ const Home = () => {
       dispatch(recommendedUser(userId));
       dispatch(getConnectionCount(userId));
       dispatch(getPostCount(userId));
+      dispatch(notificationList(userId));
     }
   }, []);
 

@@ -1,12 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { fetch_get } from "../utils";
+import { fetch_get, fetch_getNotAuth } from "../utils";
 
 export const showList = createAsyncThunk(
   "showList",
   async (args,{ rejectWithValue }) => {
-    const response = await fetch_get("http://192.168.1.197:5005/recommendation/get")
+    console.log("-----")
+    const response = await fetch_getNotAuth("http://192.168.1.197:5005/recommendation/get")
     try {
       const result = await response.data
+    console.log(result)
       return result
     } catch (error) {
       return rejectWithValue(error)
